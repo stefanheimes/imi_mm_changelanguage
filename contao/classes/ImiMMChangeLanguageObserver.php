@@ -133,7 +133,7 @@ class ImiMMChangeLanguageObserver
 		if ($targetLanguage == $GLOBALS['TL_LANGUAGE']) {
             // add missing url parameter
 		    $event->getUrlParameterBag()->setUrlAttribute('items', $alias);
-			return;
+		    return;
 		}
 
 		// allow overwriting of the auto-detected definition
@@ -160,6 +160,29 @@ class ImiMMChangeLanguageObserver
 			if (count($ids) < 1) {
 				continue;
 			}
+
+            // check for a published attribute
+			if ($metaModel->hasAttribute('published')) {
+                $published = $metaModel->getAttribute('published');
+
+                $publishedData = array_shift($published->getTranslatedDataFor($ids, $targetLanguage));
+                if ($publishedData == null) {
+                    $publishedData = array_shift($published->getTranslatedDataFor($ids, $strFallbackLanguage));
+                }
+
+                if (!is_null($publishedData)) {
+                    // found a published attribute
+
+                    if (!$publishedData['value']) {
+                        // the item is not published in this language
+                        // fallback to the parent page
+                        $targetPage = $event->getNavigationItem()->getTargetPage();
+                        $targetPage = \Contao\PageModel::findByPk($targetPage->pid);
+                        $event->getNavigationItem()->setTargetPage($targetPage, false);
+                        return;
+                    }
+                }
+            }
 
 			$attributeData = array_shift($attribute->getTranslatedDataFor($ids, $targetLanguage));
 			if ($attributeData == null) {
