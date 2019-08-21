@@ -121,12 +121,18 @@ class ImiMMChangeLanguageObserver
 
         $currentMetaModels = $this->getCurrentMetamodels();
 
+        if (!$currentMetaModels) {
+            return;
+        }
+
 		$alias = \Input::get('auto_item');
 		if ($alias == null) {
 			return;
 		}
 
 		if ($targetLanguage == $GLOBALS['TL_LANGUAGE']) {
+            // add missing url parameter
+		    $event->getUrlParameterBag()->setUrlAttribute('items', $alias);
 			return;
 		}
 
