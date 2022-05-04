@@ -177,7 +177,13 @@ class ImiMMChangeLanguageObserver
                         // the item is not published in this language
                         // fallback to the parent page
                         $targetPage = $event->getNavigationItem()->getTargetPage();
-                        $targetPage = \Contao\PageModel::findByPk($targetPage->pid);
+                        // If the pid is 0 we allready have the root page.
+                        if(!empty($targetPage->pid)){
+                            $targetPage = \Contao\PageModel::findByPk($targetPage->pid);
+                        } else {
+                            $targetPage = \Contao\PageModel::findByPk($targetPage->id);
+                        }
+
                         $event->getNavigationItem()->setTargetPage($targetPage, false);
                         return;
                     }
